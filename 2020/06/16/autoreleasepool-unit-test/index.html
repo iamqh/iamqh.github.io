@@ -9,8 +9,8 @@
     <meta name="description" content="Memory leaks thường xảy ra mà không có bất cứ thông báo nào. Mặc dù việc sử dụng weak reference cho self trong các closure đã giúp ích rất nhiều, nhưng như thế là chưa đủ. Chúng ta có thể sử dụng memo">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test">
-<meta property="og:url" content="https://diclonedao.web.app/2020/06/16/autoreleasepool-unit-test/index.html">
-<meta property="og:site_name" content="MarchBoy">
+<meta property="og:url" content="iamqh.github.io/2020/06/16/autoreleasepool-unit-test/index.html">
+<meta property="og:site_name" content="iamqh">
 <meta property="og:description" content="Memory leaks thường xảy ra mà không có bất cứ thông báo nào. Mặc dù việc sử dụng weak reference cho self trong các closure đã giúp ích rất nhiều, nhưng như thế là chưa đủ. Chúng ta có thể sử dụng memo">
 <meta property="og:locale" content="vi_VN">
 <meta property="article:published_time" content="2020-06-16T01:59:47.000Z">
@@ -96,17 +96,17 @@
     <br/>
     <div id="share" style="display: none">
       <ul>
-  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://diclonedao.web.app/2020/06/16/autoreleasepool-unit-test/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=https://diclonedao.web.app/2020/06/16/autoreleasepool-unit-test/&text=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://diclonedao.web.app/2020/06/16/autoreleasepool-unit-test/&title=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://diclonedao.web.app/2020/06/16/autoreleasepool-unit-test/&is_video=false&description=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test&body=Check out this article: https://diclonedao.web.app/2020/06/16/autoreleasepool-unit-test/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=https://diclonedao.web.app/2020/06/16/autoreleasepool-unit-test/&title=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=https://diclonedao.web.app/2020/06/16/autoreleasepool-unit-test/&title=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://diclonedao.web.app/2020/06/16/autoreleasepool-unit-test/&title=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=https://diclonedao.web.app/2020/06/16/autoreleasepool-unit-test/&title=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://diclonedao.web.app/2020/06/16/autoreleasepool-unit-test/&name=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=https://diclonedao.web.app/2020/06/16/autoreleasepool-unit-test/&t=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=iamqh.github.io/2020/06/16/autoreleasepool-unit-test/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=iamqh.github.io/2020/06/16/autoreleasepool-unit-test/&text=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=iamqh.github.io/2020/06/16/autoreleasepool-unit-test/&title=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=iamqh.github.io/2020/06/16/autoreleasepool-unit-test/&is_video=false&description=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test&body=Check out this article: iamqh.github.io/2020/06/16/autoreleasepool-unit-test/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=iamqh.github.io/2020/06/16/autoreleasepool-unit-test/&title=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=iamqh.github.io/2020/06/16/autoreleasepool-unit-test/&title=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=iamqh.github.io/2020/06/16/autoreleasepool-unit-test/&title=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=iamqh.github.io/2020/06/16/autoreleasepool-unit-test/&title=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=iamqh.github.io/2020/06/16/autoreleasepool-unit-test/&name=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=iamqh.github.io/2020/06/16/autoreleasepool-unit-test/&t=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -130,7 +130,7 @@
 
     <div class="meta">
       <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
-        <span itemprop="name">MarchBoy</span>
+        <span itemprop="name">iamqh</span>
       </span>
       
     <div class="postdate">
@@ -206,17 +206,17 @@
 
     <div id="share-footer" style="display: none">
       <ul>
-  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://diclonedao.web.app/2020/06/16/autoreleasepool-unit-test/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=https://diclonedao.web.app/2020/06/16/autoreleasepool-unit-test/&text=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://diclonedao.web.app/2020/06/16/autoreleasepool-unit-test/&title=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://diclonedao.web.app/2020/06/16/autoreleasepool-unit-test/&is_video=false&description=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test&body=Check out this article: https://diclonedao.web.app/2020/06/16/autoreleasepool-unit-test/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=https://diclonedao.web.app/2020/06/16/autoreleasepool-unit-test/&title=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=https://diclonedao.web.app/2020/06/16/autoreleasepool-unit-test/&title=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://diclonedao.web.app/2020/06/16/autoreleasepool-unit-test/&title=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=https://diclonedao.web.app/2020/06/16/autoreleasepool-unit-test/&title=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://diclonedao.web.app/2020/06/16/autoreleasepool-unit-test/&name=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=https://diclonedao.web.app/2020/06/16/autoreleasepool-unit-test/&t=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=iamqh.github.io/2020/06/16/autoreleasepool-unit-test/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=iamqh.github.io/2020/06/16/autoreleasepool-unit-test/&text=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=iamqh.github.io/2020/06/16/autoreleasepool-unit-test/&title=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=iamqh.github.io/2020/06/16/autoreleasepool-unit-test/&is_video=false&description=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test&body=Check out this article: iamqh.github.io/2020/06/16/autoreleasepool-unit-test/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=iamqh.github.io/2020/06/16/autoreleasepool-unit-test/&title=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=iamqh.github.io/2020/06/16/autoreleasepool-unit-test/&title=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=iamqh.github.io/2020/06/16/autoreleasepool-unit-test/&title=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=iamqh.github.io/2020/06/16/autoreleasepool-unit-test/&title=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=iamqh.github.io/2020/06/16/autoreleasepool-unit-test/&name=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=iamqh.github.io/2020/06/16/autoreleasepool-unit-test/&t=Ngăn ngừa Memory leaks bằng autoreleasepool trong unit test" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
