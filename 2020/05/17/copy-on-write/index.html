@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang=vi>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="Trong Swift, ta có kiểu reference type (Class) và value type (Struct, Tuble, enum). Kiểu value type có bản chất là copy. Có nghĩa là nếu bạn gán một value type cho một biến hoặc pass nó như một parame">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hiểu về Copy-on-Write trong Swift">
+<meta property="og:url" content="iamqh.github.io/2020/05/17/copy-on-write/index.html">
+<meta property="og:site_name" content="iamqh">
+<meta property="og:description" content="Trong Swift, ta có kiểu reference type (Class) và value type (Struct, Tuble, enum). Kiểu value type có bản chất là copy. Có nghĩa là nếu bạn gán một value type cho một biến hoặc pass nó như một parame">
+<meta property="og:locale" content="vi_VN">
+<meta property="og:image" content="https://images.viblo.asia/d311990e-d441-46f9-a0dc-1a11e9af5f47.png">
+<meta property="article:published_time" content="2020-05-17T01:59:47.000Z">
+<meta property="article:modified_time" content="2021-05-14T09:20:21.242Z">
+<meta property="article:author" content="Hoa Pham">
+<meta property="article:tag" content="iOS">
+<meta property="article:tag" content="swift">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://images.viblo.asia/d311990e-d441-46f9-a0dc-1a11e9af5f47.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Hiểu về Copy-on-Write trong Swift</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Trang chủ</a></li>
+         
+          <li><a href="/archives/">Bài viết</a></li>
+         
+          <li><a href="/tags/">Tag</a></li>
+         
+          <li><a href="/about/">Giới thiệu</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2020/06/16/autoreleasepool-unit-test/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+        <li>
+          <div id="footer-theme" onmouseover="$('#i-toggle').toggle();" onmouseout="$('#i-toggle').toggle();">
+            <input type="checkbox" id="theme-switch">
+            <label for="theme-switch"></label>
+        </div>
+        </li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Bài trước</span>
+      <span id="i-next" class="info" style="display:none;">Bài tiếp theo</span>
+      <span id="i-top" class="info" style="display:none;">Về đầu trang</span>
+      <span id="i-share" class="info" style="display:none;">Chia sẻ bài viết</span>
+      <span id="i-toggle" class="info" style="display:none;">Dark/Light mode</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=iamqh.github.io/2020/05/17/copy-on-write/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=iamqh.github.io/2020/05/17/copy-on-write/&text=Hiểu về Copy-on-Write trong Swift" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=iamqh.github.io/2020/05/17/copy-on-write/&title=Hiểu về Copy-on-Write trong Swift" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=iamqh.github.io/2020/05/17/copy-on-write/&is_video=false&description=Hiểu về Copy-on-Write trong Swift" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Hiểu về Copy-on-Write trong Swift&body=Check out this article: iamqh.github.io/2020/05/17/copy-on-write/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=iamqh.github.io/2020/05/17/copy-on-write/&title=Hiểu về Copy-on-Write trong Swift" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=iamqh.github.io/2020/05/17/copy-on-write/&title=Hiểu về Copy-on-Write trong Swift" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=iamqh.github.io/2020/05/17/copy-on-write/&title=Hiểu về Copy-on-Write trong Swift" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=iamqh.github.io/2020/05/17/copy-on-write/&title=Hiểu về Copy-on-Write trong Swift" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=iamqh.github.io/2020/05/17/copy-on-write/&name=Hiểu về Copy-on-Write trong Swift&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=iamqh.github.io/2020/05/17/copy-on-write/&t=Hiểu về Copy-on-Write trong Swift" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Copy-on-Write-la-gi"><span class="toc-number">1.</span> <span class="toc-text">Copy-on-Write là gì?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Cai-dat-Copy-on-Write-cho-custom-value-type"><span class="toc-number">2.</span> <span class="toc-text">Cài đặt Copy-on-Write cho custom value type</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Ket-luan"><span class="toc-number">3.</span> <span class="toc-text">Kết luận</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <!-- <div class="button_scroll2top" onclick="page_scroll2top()">
+  <i class="fa fa-angle-up fa-lg fa-angle-style"></i>
+</div> -->
+<!-- <div class="scroll-top-wrapper" onclick="page_scroll2top()">
+	<span class="scroll-top-inner">
+		<i class="fas fa-angle-double-up fa-2x"></i>
+	</span>
+</div> -->
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Hiểu về Copy-on-Write trong Swift
+    </h1>
+
+
+
+      <div class="meta">
+        <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <span itemprop="name">
+            
+                  iamqh
+                    
+          </span>
+        </span>
+        
+    <div class="postdate">
+      
+        <time datetime="2020-05-17T01:59:47.000Z" itemprop="datePublished">2020-05-17</time>
+        
+      
+    </div>
+
+
+          
+
+            
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/iOS/" rel="tag">iOS</a>, <a class="tag-link" href="/tags/swift/" rel="tag">swift</a>
+    </div>
+
+
+              <div class="article-tag">
+                <i class="fas fa-book"></i>
+                5 min. read
+              </div>
+      </div>
+  </header>
+  
+
+    <div class="content" itemprop="articleBody">
+      <p>Trong Swift, ta có kiểu reference type (Class) và value type (Struct, Tuble, enum). Kiểu value type có bản chất là copy. Có nghĩa là nếu bạn gán một value type cho một biến hoặc pass nó như một parameter của function (không phải inout), dữ liệu của value type này sẽ được copy. Lúc này, bạn sẽ có 2 value type có nội dung giống nhau nhưng có 2 địa chỉ bộ nhớ riêng biệt.<br>Hôm nay chúng ta sẽ nói về Copy-on-Write (CoW), một thứ rất quan trọng để hiểu về cách quản lý bộ nhớ value type của Swift</p>
+<h2 id="Copy-on-Write-la-gi"><a href="#Copy-on-Write-la-gi" class="headerlink" title="Copy-on-Write là gì?"></a><strong>Copy-on-Write là gì?</strong></h2><p>Trong Swift, khi bạn có một lượng lớn các value type và gán hoặc truyền chúng qua các function, việc copy rất tốn kém về mặt hiệu năng vì bạn sẽ phải copy tất cả dữ liệu sang một vị trí khác trong bộ nhớ.<br>Để giảm thiểu vấn đề này, thư viện chuẩn của Swift đã cài đặt một cơ chế cho một số loại value type như Array, khi mà giá trị chỉ được copy khi chúng bị thay đổi, thậm chí là chỉ khi có hơn một tham chiếu đến nó (bởi nếu giá trị có một tham chiếu duy nhất, nó không cần phải copy nữa, khi đó, nó chỉ cần thay đổi trên tham chiếu thôi). Khi đó, nếu chỉ gán hoặc truyền một Array qua function, sẽ không cần phải copy và sẽ cải thiện được hiệu năng</p>
+<p><strong>Một lưu ý quan trọng là …</strong></p>
+<p>Copy-on-Write không phải là cách làm việc mặc định của value type, nó chỉ được cài đặt cho một số loại dữ liệu cụ thể trong Swift Standard Library như Array và Collection mà thôi. Điều này có nghĩa là không phải mọi value type trong Swift Standard Library điều có CoW. Đương nhiên là các value type bạn tự tạo cũng sẽ không có nó, trừ khi bạn tự mình cài đặt chúng (sẽ được đề cập ở phần sau)</p>
+<p>Giờ hãy xem nó hoạt động thế nào qua ví dụ sau:<br><img src="https://images.viblo.asia/d311990e-d441-46f9-a0dc-1a11e9af5f47.png" alt=""></p>
+<p>Đây là cách đơn giản cho thấy cách mà Copy-on-Write hoạt động. Khởi tạo array1 với giá trị, sau đó gán cho array2. Khi đó, khi array2 chưa có sự thay đổi, ta có thể thấy nó chưa hề được copy, địa chỉ của array2 vẫn giống với array1. Sau khi thay đổi array2, ta thấy địa chỉ của nó đã bị thay đổi.</p>
+<h2 id="Cai-dat-Copy-on-Write-cho-custom-value-type"><a href="#Cai-dat-Copy-on-Write-cho-custom-value-type" class="headerlink" title="Cài đặt Copy-on-Write cho custom value type"></a><strong>Cài đặt Copy-on-Write cho custom value type</strong></h2><p>Bạn có thể tự cài đặt CoW cho value type của mình. Ví dụ dưới đây có thể tìm thấy ở <a href="https://github.com/apple/swift/blob/master/docs/OptimizationTips.rst" target="_blank" rel="noopener">OptimizationTips.rst</a>  của  <a href="https://github.com/apple/swift" target="_blank" rel="noopener">Swift main</a> repo.</p>
+<script src="https://gist.github.com/LucianoPAlmeida/e816b444834232506bad0078b4be0ad3.js"></script>
+
+<p>Đây là đoạn code mới chỉ ra cách dùng một reference type để cài đặt CoW cho một value type T bất kỳ. Về cơ bản, đây là một wrapper quản lý reference type và chỉ trả về một instance mới khi giá trị không có tham chiếu độc nhất. Mặt khác, nó chỉ thay đổi giá trị của reference type</p>
+<h2 id="Ket-luan"><a href="#Ket-luan" class="headerlink" title="Kết luận"></a><strong>Kết luận</strong></h2><p>Copy-on-Write là một phương pháp thông minh để tối ưu việc copy của value type và là một cơ chế được dùng rất nhiều trong Swift, cho dù chúng ta hầu như không thể nhìn thấy nó vì nó đã được cài đặt trong Standard Library. Nhưng chắc chắn vẫn tốt khi ta có thể biết và có thể áp dụng nó vào code hàng ngày để nâng cao được hiệu năng của ứng dụng.</p>
+
+    </div>
+</article>
+
+
+
+  <div class="comments">
+    <div id="comment-loading" class="loading"></div>
+    <div id="login-box" class="login">
+      Bạn nghĩ như thế nào về bài viết này?<br /><button onclick="login()">Tham gia bình luận</button>
+      <div class="copyright">Chức năng này cần liên kết với tài khoản Google<br />Nếu không thích thì có thể comment
+        <button onclick="goninja()">Nặc danh</button>
+      </div>
+    </div>
+    <div id="comment-box" class="comment-input">
+      <div class="avatar">
+        <img id="user-avatar" src="" width="32" height="32" />
+      </div>
+      <div class="input">
+        <textarea id="comment-content" onkeyup="autoSizing(this)" onkeydown="submitComment(event)"
+          placeholder="Comment gõ vào đây :D"></textarea>
+        <span>Gõ xong nhấn <code>Ctrl</code> + <code>Enter</code> để gửi. Bạn không thể xóa comment sau khi gửi.</span>
+        <button id="comment-button" onclick="submitData()">Gửi</button>
+      </div>
+    </div>
+    <ul id="comment-list" class="comment-list"></ul>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery-linkify/2.1.9/linkify.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery-linkify/2.1.9/linkify-jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery-linkify/2.1.9/linkify-html.min.js" integrity="sha512-utRbYaR9KdGo5zyscXAOomJjy8nOGc4IhDcCO4NjrkpXE14lmkvnC0TPrsRXfk+EIvf2cEMXQI2jEpSNh/jGvA==" crossorigin="anonymous"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/8.5.0/firebase-app.js"></script>
+  <!-- If you enabled Analytics in your project, add the Firebase SDK for Analytics -->
+  <script src="https://www.gstatic.com/firebasejs/8.5.0/firebase-analytics.js"></script>
+
+  <!-- Add Firebase products that you want to use -->
+  <script src="https://www.gstatic.com/firebasejs/8.5.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.5.0/firebase-firestore.js"></script>
+  <script>let postSlug = "2020/05/17/copy-on-write/".match(/[^\/]+/g).pop()</script>
+  <script>
+    // Initialize Firebase
+    var firebaseConfig = {
+      apiKey: "AIzaSyDSOP8BJBidyNm2L_VYuz_zkWxXoNNQENE",
+      authDomain: "iamqh-2d10b.firebaseapp.com",
+      projectId: "iamqh-2d10b",
+      storageBucket: "iamqh-2d10b.appspot.com",
+      messagingSenderId: "172572963962",
+      appId: "1:172572963962:web:c4611bebbaefeaf38537c3",
+      measurementId: "G-MR4X23L858"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    var provider = new firebase.auth.GoogleAuthProvider();
+    var auth = firebase.auth();
+    var currentUser = null;
+    var db = firebase.firestore();
+
+    var updateAuth = function (user) {
+      document.getElementById("comment-loading").style.display = "none";
+      if (user) {
+        currentUser = user;
+        // Logged in
+        document.getElementById("login-box").style.display = "none";
+        document.getElementById("comment-box").style.display = "flex";
+        document.getElementById("user-avatar").setAttribute("src", user.photoURL);
+      } else {
+        // Not login yet
+        document.getElementById("comment-box").style.display = "none";
+        document.getElementById("login-box").style.display = "block";
+      }
+    };
+
+    auth.onAuthStateChanged(function (user) {
+      updateAuth(user);
+    });
+
+    var login = function () {
+      auth.signInWithPopup(provider)
+        .then(function (result) {
+        }).catch(function (err) {
+        });
+    };
+
+    var goninja = function () {
+      updateAuth({
+        displayName: "Không Tên",
+        photoURL: "https://i.imgur.com/03lrXKb.png"
+      });
+    };
+
+    var encodeHTML = function (s) {
+      return s.replace(/</g, '&lt;').replace(/"/g, '&quot;').replace(/>/g, '&gt;');
+    };
+
+    var saveNewComment = function (comment) {
+      if (!currentUser) {
+        return;
+      }
+      var commentData = {
+        username: currentUser.displayName,
+        avatar: currentUser.photoURL,
+        post_time: ~~((new Date()).getTime() / 1000),
+        message: encodeHTML(comment),
+        slug: postSlug
+      };
+
+      db.collection("comments")
+        .add(commentData)
+        .then(() => {
+          addNewComment(commentData.username, commentData.avatar, commentData.post_time, commentData.message);
+        })
+
+      // fetch(postCommentURL, {
+      //   method: 'post',
+      //   headers: {
+      //     "Content-Type": "application/json"
+      //   },
+      //   body: JSON.stringify(commentData)
+      // }).then((result) => {
+      //   if (result.status === 200) {
+
+      //   }
+      // });
+
+      document.getElementById("comment-content").value = "";
+    };
+
+    function debounce(func, wait, immediate) {
+      var timeout;
+      return function () {
+        var context = this, args = arguments;
+        var later = function () {
+          timeout = null;
+          if (!immediate) func.apply(context, args);
+        };
+        var callNow = immediate && !timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+        if (callNow) func.apply(context, args);
+      };
+    };
+
+    var submitData = debounce(function () {
+      var comment = document.getElementById("comment-content").value;
+      if (comment.length) {
+        saveNewComment(comment);
+      }
+    }, 250);
+
+    var submitComment = function (e) {
+      var keyCode = e.which || e.keyCode;
+      var ctrlCode = e.ctrlKey || e.metaKey;
+      if (keyCode === 13 && ctrlCode) {
+        submitData();
+      }
+    };
+
+    var filterNewlineInComment = function (t) {
+      return t.replace(/\n/g, "<br/>");
+    };
+
+    var filterURLinComment = function (comment) {
+      return comment.replace(/(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,})/g, "<a target='_blank' rel='noopener noreferrer' href='$1'>$1</a>");
+    };
+
+    var addNewComment = function (user, avatar, time, comment) {
+      var commentFiltered = encodeHTML(comment);
+      commentFiltered = filterNewlineInComment(linkifyHtml(commentFiltered));
+      var d = new Date(time * 1000);
+      var commentTime = d.toLocaleTimeString() + ' ' + d.toLocaleDateString();
+      var html = '<div class="avatar">' +
+        '   <img src="' + avatar + '" width="32" height="32"/>' +
+        ' </div>' +
+        '<div class="comment tex2jax_ignore">' +
+        '  <div class="metadata"><b>' + encodeHTML(user) + '</b> lúc <span>' + commentTime + '</span></div>' +
+        '  <div class="content">' + commentFiltered
+      '  </div>' +
+        '</div>';
+      var li = document.createElement('li');
+      li.innerHTML = html;
+      document.getElementById("comment-list").append(li);
+    };
+
+    // Fetch comment and put to posts
+    // fetch(postCommentURL)
+    //   .then(res => res.json())
+    //   .then(data => {
+    //     if (data.comments) {
+    //       let comments = data.comments;
+    //       comments.sort((a, b) => a.post_time - b.post_time);
+    //       for (let i = 0; i < comments.length; i++) {
+    //         let cmt = comments[i];
+    //         addNewComment(cmt.username, cmt.avatar, cmt.post_time, cmt.message);
+    //       }
+    //     }
+    //   });
+    db.collection("comments")
+      .where("slug", "==", postSlug)
+      .get()
+      .then(data => {
+        if (data) {
+          let comments = [];
+          data.forEach(item => {
+            comments.push(item.data())
+          })
+          comments.sort((a, b) => a.post_time - b.post_time);
+          for (let i = 0; i < comments.length; i++) {
+            let cmt = comments[i];
+            addNewComment(cmt.username, cmt.avatar, cmt.post_time, cmt.message);
+          }
+        }
+      })
+  </script>
+        
+          <div class="scroll-top-wrapper" onclick="page_scroll2top()">
+	<span class="scroll-top-inner">
+		<i class="fas fa-angle-double-up fa-lg"></i>
+	</span>
+</div>
+<div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Trang chủ</a></li>
+         
+          <li><a href="/archives/">Bài viết</a></li>
+         
+          <li><a href="/tags/">Tag</a></li>
+         
+          <li><a href="/about/">Giới thiệu</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Copy-on-Write-la-gi"><span class="toc-number">1.</span> <span class="toc-text">Copy-on-Write là gì?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Cai-dat-Copy-on-Write-cho-custom-value-type"><span class="toc-number">2.</span> <span class="toc-text">Cài đặt Copy-on-Write cho custom value type</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Ket-luan"><span class="toc-number">3.</span> <span class="toc-text">Kết luận</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=iamqh.github.io/2020/05/17/copy-on-write/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=iamqh.github.io/2020/05/17/copy-on-write/&text=Hiểu về Copy-on-Write trong Swift" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=iamqh.github.io/2020/05/17/copy-on-write/&title=Hiểu về Copy-on-Write trong Swift" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=iamqh.github.io/2020/05/17/copy-on-write/&is_video=false&description=Hiểu về Copy-on-Write trong Swift" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Hiểu về Copy-on-Write trong Swift&body=Check out this article: iamqh.github.io/2020/05/17/copy-on-write/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=iamqh.github.io/2020/05/17/copy-on-write/&title=Hiểu về Copy-on-Write trong Swift" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=iamqh.github.io/2020/05/17/copy-on-write/&title=Hiểu về Copy-on-Write trong Swift" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=iamqh.github.io/2020/05/17/copy-on-write/&title=Hiểu về Copy-on-Write trong Swift" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=iamqh.github.io/2020/05/17/copy-on-write/&title=Hiểu về Copy-on-Write trong Swift" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=iamqh.github.io/2020/05/17/copy-on-write/&name=Hiểu về Copy-on-Write trong Swift&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=iamqh.github.io/2020/05/17/copy-on-write/&t=Hiểu về Copy-on-Write trong Swift" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i><br>Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i><br>TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i><br>Chia sẻ</a>
+        <a id="footer-theme" class="icon">
+          <input type="checkbox" id="theme-switch">
+          <label for="theme-switch"></label>
+          <br>
+          Dark/Light mode
+        </a>
+        <!-- <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i><br>Về đầu trang</a> -->
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Bản quyền &copy;
+    
+    
+    2021
+    Hoa Pham
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Trang chủ</a></li>
+         
+          <li><a href="/archives/">Bài viết</a></li>
+         
+          <li><a href="/tags/">Tag</a></li>
+         
+          <li><a href="/about/">Giới thiệu</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<link rel="stylesheet" href="/emoji/css/messenger.min.css">
+
+
+<link rel="stylesheet" href="/emoji/css/thinking.ext.css">
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>
