@@ -1485,6 +1485,7 @@ article .content .caption {
   height: 32px;
   border-radius: 3px;
   overflow: hidden;
+  background: #fff;
 }
 .comments .comment-input .input {
   flex: 1;
@@ -1546,7 +1547,7 @@ article .content .caption {
   height: 32px;
   border-radius: 3px;
   overflow: hidden;
-  padding: 8px;
+  background: #fff;
 }
 .comments .comment-list li .comment {
   flex: 1;
